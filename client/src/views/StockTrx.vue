@@ -404,7 +404,8 @@ export default {
       this.group3 = "group3";
       this.group4 = "group4";
     }
-  },
+  },  
+  
   methods: {
     // crm
     async getStockList() {
