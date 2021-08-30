@@ -6,6 +6,7 @@ const { checktoken, jwtSignUser } = require("./checkToken");
 const dayjs = require("dayjs")
 const businessDays = require("dayjs-business-days");
 
+
 router.post("/getStockList", (req, res) => {
     console.log(req.body)
     // res.json({awesome: "It Works"})
