@@ -95,6 +95,14 @@ const routes = [
       )
   },
   {
+    path: "/stocktrx",
+    name: "stocktrx",
+    component: () =>
+      import(
+        /* webpackChunkName: "paymentCertificates" */ "../views/StockTrx.vue"
+      )
+  },
+  {
     path: "/cashflow",
     name: "Cashflow",
     component: () =>

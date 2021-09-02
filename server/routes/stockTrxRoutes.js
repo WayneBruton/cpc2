@@ -10,7 +10,7 @@ const businessDays = require("dayjs-business-days");
 router.post("/getStockList", (req, res) => {
     console.log(req.body)
     // res.json({awesome: "It Works"})
-    let mysql = `select * from deliveries where development = ${req.body.id}`
+    let mysql = `select * from deliveries d join purchaseorders po on po.PONumber = d.PONumber join stockitems si on si.id = po.stockId where development = ${req.body.id}`
   
     pool.getConnection(function (err, connection) {
       if (err) {
@@ -21,7 +21,7 @@ router.post("/getStockList", (req, res) => {
         if (error) {
           console.log(error);
         } else {
-          console.log(result)
+          console.log("getStockList", result)
           res.json(result);
         }
       });

@@ -135,15 +135,15 @@ export default {
   data: () => ({
     valid: true,
     value: true,
-    passwordIncorrect: true,
+    passwordIncorrect: false,
     // email: "waynebruton@icloud.com",
-    email: "",
+    email: "connorm11111@gmail.com",
     emailRules: [
       v => !!v || "E-mail is required",
       v => /.+@.+\..+/.test(v) || "E-mail must be valid"
     ],
     // password: "Qwerty1!",
-    password: "",
+    password: "Alasco12!",
     emailExists: false,
     snackbar: false,
     snackbarMessage: "",
@@ -172,6 +172,7 @@ export default {
       this.flex = 6;
       this.offset = 3;
     }
+    this.login();
   },
   methods: {
     async login() {

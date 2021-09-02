@@ -43,6 +43,9 @@ router.post("/importTasks", checktoken, (req, res) => {
   });
 });
 
+
+
+
 router.get("/getUnits/:id", checktoken, (req, res) => {
   let post = [];
   let postData = [];
@@ -762,6 +765,65 @@ router.post("/updateTaskList", (req, res) => {
   });
 });
 
+// stockTrx stuff
+router.post("/getStockList", (req, res) => {
+  console.log(req.body)
+  // res.json({awesome: "It Works"})
+  //let mysql = `select distinct mainCategory(reference) from stockonhand
+  let mysql = ` select 
+      
+      stockId,
+      reference as mainCategory, 
+      po.itemCode, 
+      po.itemDescription, 
+      SUM(d.quantityDelivered) as qtyOnHand, 
+      0 as requisitioned
+    from deliveries d 
+    join purchaseorders po on po.PONumber = d.PONumber 
+    join stockitems si on si.id = po.stockId    
+    where d.development = ${req.body.id}
+    group by stockId, reference, itemCode, itemDescription`
+  //let mysql2 = `select * from deliveries d join purchaseorders po on po.PONumber = d.PONumber join stockitems si on si.id = po.stockId`
+  pool.getConnection(function (err, connection) {
+    if (err) {
+      connection.release();
+      resizeBy.send("Error with connection");
+    }
+    connection.query(mysql, function (error, result) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("getStockList success 2")
 
+        res.json(result);
+      }
+    });
+    connection.release();
+  });
+}),
 
+  router.post("/getSubContractors", (req, res) => {
+    console.log(req.body)
+    // res.json({awesome: "It Works"})
+    let mysql = `select * from suppliers s where s.isSubcontractor = 1`
+    // and s.development = ${req.body.id}
+  
+    pool.getConnection(function (err, connection) {
+      if (err) {
+        connection.release();
+        resizeBy.send("Error with connection");
+      }
+      connection.query(mysql, function (error, result) {
+        if (error) {
+          console.log(error);
+        } else {          
+          console.log("getSubContractors success 2")
+          res.json(result);
+        }
+      });
+      connection.release();
+    });
+  });
+
+// end
 module.exports = router;

@@ -209,6 +209,15 @@ export default {
             menu: 1,
             id: "images",
             color: "yellow"
+          },
+          {
+            title: "Stock Transfers",
+            name: "stocktrx",
+            icon: "mdi-certificate",
+            role: 3,
+            menu: 1,
+            id: "stocktrx",
+            color: "blue lighten-5"
           }
           // {
           //   title: "P&G's",
