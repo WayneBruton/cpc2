@@ -159,7 +159,7 @@ router.post("/getUnitsForOptions", (req, res) => {
 });
 // end of SalesStart routes 
 
-// Routes for investordetails (unitinfo.vue), and salesdata
+// Routes for investordetails (unitinfo.vue), and salesData
 router.post("/getInvestmentData", (req, res) => {
   
   console.log("/getInvestmentData req.body = ", req.body)
@@ -186,11 +186,11 @@ router.post("/getInvestmentData", (req, res) => {
   });
 });
 
-// salesdata routes
+// salesData routes
 router.post("/getSalesData", (req, res) => {
   
   console.log("/getSalesData req.body = ", req.body)
-  let mysql = `select * from salesdata sd ;`
+  let mysql = `select * from salesData sd ;`
   // sql to append when the unit is passed in 
   //where i.unit = ${req.body.unit}
 
@@ -213,11 +213,11 @@ router.post("/getSalesData", (req, res) => {
   });
 });
 
-// salesdata routes
+// salesData routes
 router.post("/getSalesDataForUnit", (req, res) => {
   
   console.log("/getSalesData req.body = ", req.body)
-  let mysql = `select * from salesdata sd where i.unit = ${req.body.unit};`
+  let mysql = `select * from salesData sd where i.unit = ${req.body.unit};`
   // sql to append when the unit is passed in 
  
 
@@ -269,7 +269,7 @@ router.post("/getClientInfoForSalesInfo", (req, res) => {
 router.post("/deleteSalesRecord", (req, res) => {
   //console.log("THE BODY OF THE DELETE", req.body)
   // 
-  let mysql = `delete from salesinfo where id = ${req.body.id}; update salesdata inner join units on units.id = salesdata.unit set sold = 0, extras = 0, deductions = 0, parking = 0, contract_price = base_price WHERE units.unitName = '${req.body.unit}' ;`
+  let mysql = `delete from salesinfo where id = ${req.body.id}; update salesData inner join units on units.id = salesData.unit set sold = 0, extras = 0, deductions = 0, parking = 0, contract_price = base_price WHERE units.unitName = '${req.body.unit}' ;`
   console.log("Delete SQL", mysql);
   pool.getConnection(function (err, connection) {
     if (err) {
@@ -519,7 +519,7 @@ router.post("/updateClient", upload.array("documents"), (req, res) => {
 
       // add twoPerson fields - after database import - 
 
-      // add pricing fields from salesdata to be updated as well 
+      // add pricing fields from salesData to be updated as well 
       // what kind of sql is to be written for the contract_price, extras, deductions, parking 
 
   // dynamicSQL file uploads 
@@ -659,7 +659,7 @@ router.post("/updateClient", upload.array("documents"), (req, res) => {
     additionalSQL = `${additionalSQL}, personTwoFilePaySlip = '${insertTwoPersonArrayPaySlip.join(",")}'`
   }
   // dynamic inserts for files, done 
-  let mysqlSalesData = ` UPDATE  salesdata as sd INNER JOIN units u ON sd.unit = u.id SET  sd.base_price = ${parseFloat(req.body.base_price)},    sd.contract_price = ${parseFloat(req.body.contract_price)}, sd.parking = ${parseFloat(req.body.parking)}, sd.extras = '${parseFloat(req.body.extras)}', sd.deductions = '${parseFloat(req.body.deductions)}', sd.sold = 1,  sd.actualsale_date = '${dateTime}' , sd.notes = '${req.body.notes}' WHERE u.unitName = '${req.body.unit}';`
+  let mysqlSalesData = ` UPDATE  salesData as sd INNER JOIN units u ON sd.unit = u.id SET  sd.base_price = ${parseFloat(req.body.base_price)},    sd.contract_price = ${parseFloat(req.body.contract_price)}, sd.parking = ${parseFloat(req.body.parking)}, sd.extras = '${parseFloat(req.body.extras)}', sd.deductions = '${parseFloat(req.body.deductions)}', sd.sold = 1,  sd.actualsale_date = '${dateTime}' , sd.notes = '${req.body.notes}' WHERE u.unitName = '${req.body.unit}';`
 
 
   mysql = `${mysql} ${additionalSQL} WHERE id = ${req.body.id} ; ${mysqlSalesData}`
@@ -882,7 +882,7 @@ router.post("/createClient", upload.array("documents"), (req, res) => {
                 '${req.body.firstName}','${req.body.lastName}','${req.body.iDNumber}', '${req.body.marital}','${req.body.email}','${req.body.bankName}','${req.body.accountNumber}','${req.body.accountType}','${req.body.block}','${req.body.unit}','${req.body.mood}','${req.body.flooring}','${fileOTP}','${fileId}', '${fileBank}','${filePaySlip}','${fileFica}','${dateTime}','${req.body.floorplan}','${req.body.mobile}','${req.body.landline}','${req.body.postalAddress}','${req.body.residentialAddress}','${req.body.salesAgent}','${req.body.salesAgentPhone}', '${req.body.personTwoFirstName}' , '${req.body.personTwoLastName}' , '${req.body.personTwoIDNumber}' , '${req.body.personTwoMarital}', '${req.body.personTwoEmail}' , '${req.body.personTwoBankName}', '${req.body.personTwoAccountNumber}', 
                 '${req.body.personTwoAccountType}', '${personTwoFileID}', '${personTwoFileBank}', '${personTwoFilePaySlip}', '${personTwoFileFica}', '${req.body.personTwoMobile}', '${req.body.personTwoLandline}', '${req.body.personTwoPostalAddress}', '${req.body.personTwoResidentialAddress}', '${req.body.salePerson}', '${req.body.saleBuyers}', '${req.body.saleType}', '${req.body.cashDeal}', '${req.body.balanceRem}', '${req.body.deposit}', ${depositDate} , '${req.body.gasStove}', '${req.body.spareRoom}','${req.body.additionalExtras}', '${req.body.additionalExtrasCost}' , '${req.body.bayNo}', '${req.body.gasStoveCost}', '${req.body.notes}') `;
 
-          let mysql2 = ` UPDATE salesdata sd 
+          let mysql2 = ` UPDATE salesData sd 
              INNER JOIN units u ON sd.unit = u.id     SET     sd.base_price = ${parseFloat(req.body.base_price)},    sd.contract_price = ${parseFloat(req.body.contract_price)}, sd.parking = ${parseFloat(req.body.parking)}, sd.extras = ${parseFloat(req.body.extras)}, sd.deductions = ${parseFloat(req.body.deductions)}, sd.sold = 1,  sd.actualsale_date = '${dateTime}'  WHERE u.unitName = '${req.body.unit}'`;
 
   

@@ -279,8 +279,9 @@ export default {
           response => {
             console.log("CLIENT-SIDE: RESPONSE DATA: ", response.data[0]);
 
-            this.sales = response.data[0];
+            this.sales.push(response.data[0]);
             this.unitId = response.data[0].unitId;
+            console.log("XDXDX", this.sales)
             this.sales.forEach(el => {
               el.fileOTPurl = `${this.url}/uploads/${el.fileOTP}`;
               // console.log("FileId", el.fileId);
@@ -400,6 +401,7 @@ export default {
     closeClientForm(event) {
       this.clientDialog = event;
       this.initialData();
+      location.reload();
     },
     getClientInfo() {
       this.clientDialog = !this.clientDialog;
@@ -413,6 +415,7 @@ export default {
     closeSignOffForm(event) {
       this.signOffDialog = event;
       this.initialData();
+      location.reload();
     },
     closeClientFiles(event) {
       console.log("THE EVENT", event);
