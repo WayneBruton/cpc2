@@ -1,47 +1,9 @@
 <template>
   <div class="about">
     <br />
-    <!-- <v-container fluid> -->
     <h2> Stock Management </h2>
-    <v-btn id="createButton" outline text @click="createTask()">Complete Transfer</v-btn>
+    <v-btn id="createButton" outlined text @click="opencompleteTransfer">Complete Transfer</v-btn>
     <br /> <br />
-    <!-- the old tasklist container -->
-    <!-- <v-row>
-      <v-layout align-start justify-center>
-      <v-col cols="8" offset="2">
-        <v-list three-line outlined shaped>
-          <v-subheader>
-            Tasks WIP and ToDo
-          </v-subheader>
-          <draggable
-            v-model="items"
-            :group="group1"
-            style="min-height: 10px"
-            @change="itemsChanged"
-          >
-            <template v-for="item in items">
-              <v-list-item :key="item.id" ripple active-class="pink--text">
-                <v-list-item-icon>
-                  <v-icon large color="purple">{{ item.icon }}</v-icon>
-                </v-list-item-icon>
-                <v-list-item-content>
-                  <v-list-item-title
-                    v-html="item.taskTitle"
-                  ></v-list-item-title>
-                  <v-list-item-subtitle
-                    v-html="`${item.typeTask} - ${item.estimate}`"
-                  ></v-list-item-subtitle>
-                  <v-list-item-subtitle
-                    v-html="item.userName"
-                  ></v-list-item-subtitle>
-                </v-list-item-content>              
-              </v-list-item>
-            </template>
-          </draggable>
-        </v-list>
-      </v-col>
-    </v-row> -->
-  
     <!-- Row wrapping the entire app -->
     <v-row>
       <!-- Entire List of Stock On Hand -->
@@ -87,49 +49,6 @@
                     v-html="stock.qtyOnHand"
                   ></v-list-item-subtitle>
                     </v-list-item-content>
-                <!-- <v-list-item-action>
-                  <div style="display: flex;">
-              
-                    <v-subheader>
-                    <b> Stock List </b> <br/>
-                     <b>
-                    {{stock.qtyOnHand}} </b>
-                  </v-subheader>
-                          </div>
-                </v-list-item-action> -->
-                    <!-- <v-text-field
-                      v-model="stock.qtyOnHand"
-                      type="number"
-                      min="0"
-                      class="shrink"
-                      label=""
-                      
-                    ></v-text-field> -->
-
-
-                    <!-- <v-btn
-                      icon
-                      v-if="
-                        userName === stock.userName ||
-                          userName === 'Wayne Bruton'
-                      "
-                      :id="stock.id"
-                      @click="deleteTask"
-                    >
-                      <v-icon color="red">mdi-trash-can</v-icon>
-                         </v-btn>
-                       -->
-                 
-        
-                    <!-- <v-btn :id="stock.id" icon @click="viewTask" >
-                      <v-icon id="viewTaskBinoc" color="green">mdi-binoculars</v-icon>
-                    </v-btn> -->
-
-
-                     <!-- <v-btn :id="stock.id" icon @click="markStockAsCounted" >
-                      <v-icon id="viewTaskBinoc" color="black">mdi-playlist-check</v-icon>
-                    </v-btn> -->
-            
               </v-list-item>
             </template>
           </draggable>
@@ -163,10 +82,7 @@
                     <v-list-item-title
                       v-html="item.supplierName"
                     ></v-list-item-title>
-                    <!-- <v-list-item-subtitle
-                      v-html="`${item.typeTask} - ${item.estimate}`"
-                    ></v-list-item-subtitle>
-                     -->
+                   
                   </v-list-item-content>
                   <v-list-item-action>
                    <v-btn
@@ -192,7 +108,12 @@
             max-height="55vh"
           >
             <v-subheader>
-             <h3> <b> Selected Stock Transfer List </b> </h3>
+             <h3> <b> Selected Stock Transfer List </b> </h3>  <v-btn
+                        icon                                                
+                        @click="clearCurrentStockList"
+                        label="Clear Stock List ">
+                        <v-icon color="red">mdi-close</v-icon>
+                      </v-btn>       
             </v-subheader>
             <draggable
               v-model="currentStockList"
@@ -213,50 +134,27 @@
                     <v-list-item-subtitle
                       v-html="stock.mainCategory"
                     ></v-list-item-subtitle>
-                    </v-list-item-content>
-
-                     <v-list-item-content>
-                       <v-list-item-title
+                  </v-list-item-content>
+                  <v-list-item-content>
+                    <v-list-item-title
                       v-html="stock.qtyToTrxLbl"
-                    ></v-list-item-title>
-                    
-                       <v-text-field
-                        v-model="stock.qtyToTransfer"
-                        type="number"
-                        min="0"
-                        class="shrink"
-                        label=""
-                        
-                      ></v-text-field>
-                    </v-list-item-content>
-
-                     <v-list-item-content>
-                      <v-list-item-title
-                        v-html="stock.qtyOnHandLbl"
-                      ></v-list-item-title>
-                  
-                      <v-list-item-subtitle
+                    ></v-list-item-title>                    
+                    <v-text-field
+                      v-model="stock.qtyToTransfer"
+                      type="number"
+                      min="0"
+                      class="shrink"
+                      label=""                        
+                    ></v-text-field>
+                  </v-list-item-content>
+                  <v-list-item-content>
+                    <v-list-item-title
+                      v-html="stock.qtyOnHandLbl"
+                    ></v-list-item-title>                  
+                    <v-list-item-subtitle
                       v-html="stock.qtyOnHand"
-                      ></v-list-item-subtitle>  
-                    </v-list-item-content>
-                    
-                    <v-list-item-action>     
-                      <div style="display: flex;">   
-                      <v-btn
-                        icon                        
-                        :id="stock.id"
-                        @click="deleteTask"
-                      >
-                        <v-icon color="red">mdi-close</v-icon>
-                      </v-btn>                                                    
-                      <!-- <v-btn :id="stock.id" icon @click="viewTask" >
-                        <v-icon id="viewTaskBinoc" color="green">mdi-binoculars</v-icon>
-                      </v-btn> -->
-                      <!-- <v-btn :id="stock.id" icon @click="markStockAsCounted" >
-                        <v-icon id="viewTaskBinoc" color="black">mdi-playlist-check</v-icon>
-                      </v-btn> -->
-                    </div>
-                  </v-list-item-action>
+                    ></v-list-item-subtitle>  
+                  </v-list-item-content>                                       
                 </v-list-item>
               </template>
             </draggable>
@@ -289,50 +187,13 @@
                 <v-list-item-content>
                   <v-list-item-title
                     v-html="item.supplierName"
-                  ></v-list-item-title>
-                  <!-- <v-list-item-subtitle
-                    v-html="`${item.typeTask} - ${item.estimate}`"
-                  ></v-list-item-subtitle>
-                  <v-list-item-subtitle
-                    v-html="item.userName"
-                  ></v-list-item-subtitle> -->
+                  ></v-list-item-title>              
                 </v-list-item-content>
               </v-list-item>
             </template>
           </draggable>
         </v-list>
       
-      <!-- <v-col cols="4" offset="6">
-        <v-list three-line outlined shaped>
-          <v-subheader>
-            Finalised
-          </v-subheader>
-          <draggable
-            v-model="items3"
-            :group="group4"
-            style="min-height: 10px"
-            @change="items3Changed"
-          >
-            <template v-for="item in items3">
-              <v-list-item :key="item.id" ripple>
-                <v-list-item-icon>
-                  <v-icon large color="red">{{ item.icon }}</v-icon>
-                </v-list-item-icon>
-                <v-list-item-content>
-                  <v-list-item-title v-html="item.title"></v-list-item-title>
-                  <v-list-item-subtitle
-                    v-html="`${item.typeTask} - ${item.estimate}`"
-                  ></v-list-item-subtitle>
-                  <v-list-item-subtitle
-                    v-html="item.userName"
-                  ></v-list-item-subtitle>
-                </v-list-item-content>
-              </v-list-item>
-            </template>
-          </draggable>
-        </v-list>
-      </v-col> -->
-      <!-- </v-layout> -->
       </v-col>
     </v-row>
 
@@ -345,22 +206,12 @@
           </v-card-title>
           <v-card-text>
             <v-container>
-              <v-row>
-                <!-- <v-col cols="12" sm="6" md="4">
-                  <v-text-field
-                    v-if="!openTransferDialog"
-                    label="User*"
-                    v-model="userName"
-                    required
-                    readonly
-                  ></v-text-field>
-                </v-col> -->
-
+              <v-row>      
                 <v-col cols="12">
                   <v-text-field
-                    label="Stock Item*"
+                    label="Sub Contractor"
                     required
-                    v-model="itemCode"
+                    v-model="selectedSubContractorName"
                     readonly
                     placeholder="Enter title of your request"                    
                   ></v-text-field>
@@ -368,71 +219,47 @@
                 <v-col cols="12">
                   <v-text-field
                       v-model="block"
-                      type="text"
-                      :readonly="openTransferDialog"
+                      type="text"                      
                       class="shrink"
-                      label="Block"
-                      
+                      label="Block"                      
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
                     v-model="unit"
-                    type="text"
-                    :readonly="openTransferDialog"
+                    type="text"                    
                     class="shrink"
-                    label="Unit"
-                    
-                  ></v-text-field>
-
-                  <!-- <v-textarea
-                    label="Text*"
-                    type="password"
-                    required
-                    v-model="text"
-                    placeholder="Place description / explanation here"
-                    :readonly="openTransferDialog"
-                    auto-grow
-                    outlined
-                    rows="1"
-                    row-height="15"
-                  ></v-textarea> -->
-                </v-col>
+                    label="Unit"                    
+                  ></v-text-field>                  
+                </v-col>              
                 <v-col cols="12">
-                  <v-text-field
-                    label="Time Estimate"
-                    required
-                    v-model="estimate"
-                    placeholder="Estimate of Time"
-                    v-if="(userName = 'Wayne Bruton' || openTransferDialog)"
-                    :readonly="openTransferDialog"
-                  ></v-text-field>
-                </v-col>
+                  <v-file-input
+                    v-model="stockTransferImage"
+                    label="Upload Image"
+                    accept="image/png, image/jpeg, image/bmp, image/jpg"
+                    filled
+                    hint="Upload Image"
+                    persistent-hint
+                    @change="uploadImage()"              
+                  ></v-file-input>       
+                </v-col> 
               </v-row>
             </v-container>
             <small>*indicates required field</small>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="closeView">
-              Close``
-            </v-btn>
-            <v-file-input
-              v-model="stockTransferImage"
-              label="Upload Image"
-              accept="image/png, image/jpeg, image/bmp, image/jpg"
-              filled
-              hint="Upload Image"
-              persistent-hint
-              @change="uploadImage()"              
-            ></v-file-input>        
-            <v-btn
-              color="blue darken-1"
-              text
-              @click="createTransfer"
-              v-if="!openTransferDialog"
-            >
+            <v-btn color="blue darken-1" text @click="closeView" v-if="openTransferDialog">
+              Close
+            </v-btn>          
+            <v-btn color="blue darken-1" text @click="completeTransfer" v-if="openTransferDialog">
               Save
+              <v-icon
+               
+              >
+              $steam
+               
+              </v-icon>
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -458,7 +285,6 @@
                     readonly
                   ></v-text-field>
                 </v-col>
-
                 <v-col cols="12">
                   <v-text-field
                     label="Title*"
@@ -533,7 +359,6 @@
                     readonly
                   ></v-text-field>
                 </v-col>
-
                 <v-col cols="12">
                   <v-text-field
                     label="Title*"
@@ -649,6 +474,8 @@ export default {
       currentSubContractor: [],
       currentStockList: [],
 
+      selectedSubContractorName: "",
+
       // Transfer Dialog Properties
       openTransferDialog: false, // used like viewOnly
       transferDialog: false,
@@ -657,7 +484,6 @@ export default {
       block: "",
       qtyToTransfer: 0,
       stockTransferImage: null
-
     };
   },
   beforeDestroy() {
@@ -695,10 +521,7 @@ export default {
   methods: {
     // crm
     async getStockList() {
-      this.StockList = [];
-      this.items1 = [];
-      this.items2 = [];
-      this.items3 = [];
+      this.StockList = [];     
       let data = {
         id: this.$store.state.development.id
       };
@@ -709,32 +532,13 @@ export default {
       })
         .then(
           response => {
-
             response.data.forEach(el => {
                 el.qtyOnHandLbl = "Qty On Hand";
-                el.qtyToTrxLbl = "Qty To Transfer"
-                this.StockList.push(el);
-                
-              // use seperate datasets for the main categories, then the subcategories with quantities 
-                //this.StockMainCateg.push(el);
-                // this needs to return distinct main categories and their sub categories, and the qty for each, from StockOnHand table
-               
-               //or
-                //this.StockMainCateg.push(el.reference)
-                //this.StockSubCateg.push(el.itemDescription);
-                // this is for distiguishing what kind of task was saved so it know which of the 4 sectors to go in
-                // smart stuff
-              // if (el.typeTask === "WIP") {
-              //   this.items.push(el);
-              // } else if (el.typeTask === "Suggested") {
-              //   this.items1.push(el);
-              // } else if (el.typeTask === "Completed") {
-              //   this.items2.push(el);
-              // } else if (el.typeTask === "Finalised") {
-              //   this.items3.push(el);
-              // }
+                el.qtyToTrxLbl = "Qty To Transfer";
+                el.qtyToTransfer = 0;
+                this.StockList.push(el);                                              
             });
-            console.log("this.StockList = ", this.StockList)           
+            //console.log("this.StockList = ", this.StockList)           
           },
           error => {
             console.log(error);
@@ -746,12 +550,9 @@ export default {
     },
     // crm
     async getSubContractors() {
-      this.SubContractors = [];
-      this.items1 = [];
-      this.items2 = [];
-      this.items3 = [];
+      this.SubContractors = [];    
       let data = {
-        id: this.$store.state.development.id
+        id: this.$store.state.development
       };
       await axios({
         method: "post",
@@ -761,19 +562,9 @@ export default {
         .then(
           response => {
             response.data.forEach(el => {
-              this.SubContractors.push(el);
-              
-              // if (el.typeTask === "WIP") {
-              //   this.items.push(el);
-              // } else if (el.typeTask === "Suggested") {
-              //   this.items1.push(el);
-              // } else if (el.typeTask === "Completed") {
-              //   this.items2.push(el);
-              // } else if (el.typeTask === "Finalised") {
-              //   this.items3.push(el);
-              // }
+              this.SubContractors.push(el);                            
             });
-            console.log("this.SubContractors = ", this.SubContractors);
+            //console.log("this.SubContractors = ", this.SubContractors);
           },
           error => {
             console.log(error);
@@ -783,17 +574,26 @@ export default {
           console.log(e);
         });
     },
+    opencompleteTransfer() {
+       this.openTransferDialog = true;
+       this.transferDialog = true;       
+    },
+    completeTransfer() {
+      console.log("CompleteTransfers get StockList and SupplierID")
+      this.completeTransfers();
+    },
     async completeTransfers() {
       // take all the stock in the currentStockList and update the status in StockTranfers table from busy to complete, or mismatch, ? 
       let insert = {
         development: this.$store.state.development.id,
-        taskText: this.text,
-        taskTitle: this.title,
-        userName: this.userName,
-        icon: "mdi-thought-bubble",
-        typeTask: "Suggested",
-        sortIndex: this.items1.length,
-        estimate: this.estimate
+        subContractor: this.currentSubContractor,
+        supplierName: this.currentSubContractor.supplierName,
+        contactId: this.currentSubContractor.contactId,
+
+        stockList: this.currentStockList,
+        unit: this.unit,
+        block: this.block,
+        qtyToTransfer: this.qty  
       };
       await axios({
         method: "post",
@@ -802,11 +602,7 @@ export default {
       })
         .then(
           () => {
-            this.items1.push(insert);
-            this.title = "";
-            this.text = "";
-            this.dialog = false;
-            this.getTasks();
+            this.refreshData()            
           },
           error => {
             console.log(error);
@@ -816,6 +612,30 @@ export default {
           console.log(e);
         });
     },
+
+    currentContractorChanged(theEvent) {      
+      if(theEvent.added) { 
+        if(this.currentSubContractor.length === 2) {
+          this.clearCurrentSubContractor();
+          alert("You may only have 1 Sub Contractor selected at a time");
+        }
+        this.currentSubContractor.forEach(subContractor => {
+          console.log("SubContractor: ", subContractor)
+          this.selectedSubContractorName = subContractor.supplierName;
+          console.log("this.selectedSubContractorName = " , this.selectedSubContractorName)
+        })
+      }
+    },
+    currentStockListChanged(theEvent) {
+      if(theEvent.added) {        
+        this.StockList.forEach(el => {
+          if (el.stockId === theEvent.added.element.stockId) {
+            el.qtyToTransfer = this.qtyToTransfer;                
+          }
+        })
+      }
+    },
+    
     uploadImage(event) {
       // upload the image 
 
@@ -827,8 +647,32 @@ export default {
           }
         });
       }
+    }, 
+    async deleteCurrentSubContractor() {
+      this.clearCurrentSubContractor();
     },
+    //clear the array of currentSubContractor for the new one
+    clearCurrentSubContractor() {  
+      this.currentSubContractor.splice(0, this.currentSubContractor.length)
+    },
+    clearCurrentStockList() {
+      this.currentStockList.splice(0, this.currentStockList.length)      
+    }, 
+    closeView() {
+      this.dialog = false;
+      this.transferDialog = false;
+      this.openTransferDialog = false;
+      this.viewOnly = false;
+    },
+    refreshData() {
+      this.clearCurrentSubContractor();
+      this.clearCurrentStockList();
+      this.closeView();
+      alert("Successfully completed Stock Transfer");
+    },
+    
 
+    // From the TaskList.vue
     async getTasks() {
       this.items = [];
       this.items1 = [];
@@ -864,7 +708,6 @@ export default {
           console.log(e);
         });
     },
-    
     async updateTasks() {
       let dataToUpdate = [];
       this.items.forEach((el, index) => {
@@ -907,52 +750,6 @@ export default {
       (this.title = ""), (this.estimate = "TBA");
       this.dialog = true;
     },
-    async createTransfer() {
-      let insert = {
-        development: this.$store.state.development.id,
-        supplierName: this.selectedSubContractorName,
-        //this info will all be in the currentStockList, more than once, so push the whole array to the route and cycle through it
-        // for each loop through it, set the stockId, itemCode etc, and write a sql insert into stocktransfers 
-        // in /createTransfer - first update the table to set anyrecords existing with status 'inTransfer' to incomplete, as to not use them in this run
-        // then insert into stocktransfers
-        // which will be /completeTransfer - update stocktransfers where supplierName = selected Supplier and status is inTransfer - to Completed
-        stockId: 0,
-        itemCode: 0,
-        block: "",
-        unit: "",
-        qtyToTransfer: 0,
-
-        //
-        taskText: this.text,
-        taskTitle: this.title,
-        userName: this.userName,
-        icon: "mdi-thought-bubble",
-        typeTask: "Suggested",
-        sortIndex: this.items1.length,
-        estimate: this.estimate
-      };
-      await axios({
-        method: "post",
-        url: `${url}/createStockTransfer`,
-        data: insert
-      })
-        .then(
-          () => {
-            this.items1.push(insert);
-            this.title = "";
-            this.text = "";
-            this.dialog = false;
-            this.getTasks();
-          },
-          error => {
-            console.log(error);
-          }
-        )
-        .catch(e => {
-          console.log(e);
-        });
-    },
-    
     async saveTask() {
       let insert = {
         development: this.$store.state.development.id,
@@ -1022,55 +819,6 @@ export default {
         });
       }
     },
-    currentContractorChanged(theEvent) {
-      if(theEvent.added) {        
-        this.SubContractors.forEach(el => {
-          if (el.id === theEvent.added.element.id) {
-            this.currentSubContractor.push(el);
-            this.selectedSubContractorName = theEvent.added.element.supplierName;
-          }
-        })
-      }
-    },
-    currentStockListChanged(theEvent) {
-      if(theEvent.added) {        
-        this.StockList.forEach(el => {
-          if (el.stockId === theEvent.added.element.stockId) {
-            el.qtyToTransfer = this.qtyToTransfer;        
-
-            this.currentStockList.push(el);
-            //this.selectedSubContractorName = theEvent.added.element.supplierName;
-          }
-        })
-      }
-    },
-    //clear the array of currentSubContractor for the new one
-    clearCurrentSubContractor() {  
-      this.currentSubContractor.splice(0, this.currentSubContractor.length)
-    },
-    subContractorChanged(evt) {
-      console.log("Contractor changed", evt)
-      // this.openTransferDialog = true;
-      // this.transferDialog = true;
-      // if (evt.added) {
-      //   this.StockList.forEach(el => {
-      //     this.itemCode = evt.added.element.itemCode;
-      //     console.log("StockList event", evt)
-      //     if(el.id === evt.added.element.stockId) {
-      //       this.itemCode = evt.added.element.itemCode;
-      //     }
-      //   })
-      // }
-      // //this.itemCode = 
-      // if (evt.added) {
-      //   this.items2.forEach(el => {
-      //     if (el.id === evt.added.element.id) {
-      //       el.icon = "mdi-checkbox-marked-circle";
-      //       el.typeTask = "Completed";
-      //     }
-      //   });
-      // }
-    },
     items3Changed(evt) {
       if (evt.added) {
         this.items3.forEach(el => {
@@ -1080,14 +828,7 @@ export default {
           }
         });
       }
-    },
-    // beginTransferDialog(event) {
-    //   console.log("the event", event);
-    //   let filteredData = this.SubContractors.filter(el => {
-    //     return el.id = parseInt(event.currentTarget.id)
-    //   })
-    // },
-
+    },    
     viewTask(event) {
       console.log("the viewTask event", event);
       let filteredData = this.items1.filter(el => {
@@ -1121,15 +862,7 @@ export default {
       });
       this.dialog1 = false;
     },
-    closeView() {
-      this.dialog = false;
-      this.transferDialog = false;
-      this.openTransferDialog = false;
-      this.viewOnly = false;
-    },
-    async deleteCurrentSubContractor() {
-      this.clearCurrentSubContractor();
-    },
+    
     async deleteTask(event) {
       console.log("the event", event);
       let data = {
@@ -1155,4 +888,3 @@ export default {
   }
 };
 </script>
-s

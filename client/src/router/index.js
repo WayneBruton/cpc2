@@ -103,6 +103,14 @@ const routes = [
       )
   },
   {
+    path: "/stocktake",
+    name: "stocktake",
+    component: () =>
+      import(
+        /* webpackChunkName: "paymentCertificates" */ "../views/StockTake.vue"
+      )
+  },
+  {
     path: "/cashflow",
     name: "Cashflow",
     component: () =>

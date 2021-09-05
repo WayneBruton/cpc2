@@ -776,8 +776,8 @@ router.post("/getStockList", (req, res) => {
       reference as mainCategory, 
       po.itemCode, 
       po.itemDescription, 
-      SUM(d.quantityDelivered) as qtyOnHand, 
-      0 as requisitioned
+      d.quantityDelivered - IFNULL(si.requisitioned,0) as qtyOnHand, 
+       IFNULL(si.requisitioned,0)
     from deliveries d 
     join purchaseorders po on po.PONumber = d.PONumber 
     join stockitems si on si.id = po.stockId    
@@ -802,28 +802,89 @@ router.post("/getStockList", (req, res) => {
   });
 }),
 
-  router.post("/getSubContractors", (req, res) => {
-    console.log(req.body)
-    // res.json({awesome: "It Works"})
-    let mysql = `select * from suppliers s where s.isSubcontractor = 1`
-    // and s.development = ${req.body.id}
-  
-    pool.getConnection(function (err, connection) {
-      if (err) {
-        connection.release();
-        resizeBy.send("Error with connection");
-      }
-      connection.query(mysql, function (error, result) {
-        if (error) {
-          console.log(error);
-        } else {          
-          console.log("getSubContractors success 2")
-          res.json(result);
-        }
-      });
+router.post("/getSubContractors", (req, res) => {
+  console.log(req.body)
+  // res.json({awesome: "It Works"})
+  let mysql = `select * from suppliers s where s.isSubcontractor = 1`
+  // and s.development = ${req.body.id}
+
+  pool.getConnection(function (err, connection) {
+    if (err) {
       connection.release();
+      resizeBy.send("Error with connection");
+    }
+    connection.query(mysql, function (error, result) {
+      if (error) {
+        console.log(error);
+      } else {          
+        console.log("getSubContractors success 2")
+        res.json(result);
+      }
     });
+    connection.release();
+  });
+});
+
+router.post("/completeTransfers", (req, res) => {
+  console.log("completeTransfers", req.body)
+
+  let mysqlPrefix = ` insert into stocktranfers (supplierName, contactID, block, unit, stockId, qtyTransfered) `
+  let mysql = "";
+  let mysql2Prefix = ` update stockitems set requisitioned = IFNULL(requisitioned,0)  + `
+  req.body.stockList.forEach(stockItem => {
+    mysql = mysql + mysqlPrefix + ` VALUES ('${req.body.subContractor[0].supplierName}', '${req.body.subContractor[0].contactID}', '${req.body.block}', '${req.body.unit}',  '${stockItem.stockId}', '${stockItem.qtyToTransfer}' ); `
+                  + mysql2Prefix + ` ${parseInt(stockItem.qtyToTransfer)} WHERE id = '${stockItem.stockId}';`
+  })
+  console.log(chalk.cyanBright("completeTransfers sql", mysql))
+
+  pool.getConnection(function (err, connection) {
+    if (err) {
+      connection.release();
+      resizeBy.send("Error with connection");
+  }
+  connection.query(mysql, function (error, result) {
+      if (error) {
+        console.log(error);
+      } else {          
+        console.log("completeTransfers success")
+        res.json(result);
+      }
+    });
+    connection.release();
   });
 
+  
+});
+
+router.post("/submitStockTake", (req, res) => {
+  console.log("submitStockTake", req.body)
+
+  let mysqlPrefix = ` insert into stocktake (stockId, qtynHand, qtyCounted, countCorrect) `
+  let mysql = "";
+  //let mysql2Prefix = ` update stockitems set requisitioned = IFNULL(requisitioned,0)  + `
+  req.body.stockList.forEach(stockItem => {
+    mysql = mysql + mysqlPrefix + ` VALUES ('${stockItem.stockId}', '${stockItem.qtyOnHand}', '${stockItem.qtyCounted}' '${req.body.subContractor[0].contactID}', '${req.body.block}', '${req.body.unit}',  '${stockItem.stockId}', 'v' ); `
+                  //+ mysql2Prefix + ` ${parseInt(stockItem.qtyToTransfer)} WHERE id = '${stockItem.stockId}';`
+  })
+  console.log(chalk.greenBright("completeTransfers sql", mysql))
+
+  pool.getConnection(function (err, connection) {
+    if (err) {
+      connection.release();
+      resizeBy.send("Error with connection");
+  }
+  connection.query(mysql, function (error, result) {
+      if (error) {
+        console.log(error);
+      } else {          
+        console.log("completeTransfers success")
+        res.json(result);
+      }
+    });
+    connection.release();
+  });
+
+  
+});
 // end
 module.exports = router;
