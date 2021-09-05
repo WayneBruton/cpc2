@@ -241,6 +241,8 @@ router.post("/getSalesDataForUnit", (req, res) => {
 });
 
 
+
+
 // salesinfo routes
 // get all valid salesInfo
 router.post("/getClientInfoForSalesInfo", (req, res) => {
@@ -257,7 +259,7 @@ router.post("/getClientInfoForSalesInfo", (req, res) => {
         console.log(error);
 
       } else {
-        //console.log("SERVER-SIDE, RESULT in salesRoutes.js", result)
+        console.log("SERVER-SIDE, RESULT in salesRoutes.js", result)
         res.json(result);        
       }
     });
@@ -509,8 +511,9 @@ router.post("/updateClient", upload.array("documents"), (req, res) => {
        enclosedBalcony='${req.body.enclosedBalcony}',
        spareRoom='${req.body.spareRoom}',
        additionalExtras='${req.body.additionalExtras}',
-       additionalExtrasCost='${req.body.additionalExtrasCost}'
-    
+       additionalExtrasCost='${req.body.additionalExtrasCost}',
+       trustName='${req.body.trustName}',
+       trustNumber='${req.body.trustNumber}' 
 
       `;
       //enclosedBalcony='${req.body.enclosedBalcony}'
@@ -878,9 +881,9 @@ router.post("/createClient", upload.array("documents"), (req, res) => {
   // var dateTime = date + " " + time;
 
   let mysql1 = `INSERT INTO salesinfo 
-  (firstname, lastname, iDNumber, marital, email, bankName, accountNumber, accountType, block, unit, mood, flooring, fileOTP, fileId, fileBank, filePaySlip, fileFica, dateCreated, floorplan, mobile, landline, postalAddress, residentialAddress, salesAgent, salesAgentPhone, personTwoFirstName, personTwoLastName, personTwoIDNumber, personTwoMarital, personTwoEmail, personTwoBankName, personTwoAccountNumber, personTwoAccountType, personTwoFileID, personTwoFileBank, personTwoFilePaySlip, personTwoFileFica, personTwoMobile, personTwoLandline, personTwoPostalAddress, personTwoResidentialAddress, salePerson, saleBuyers, saleType, cashDeal, balanceRem, deposit, depositDate, gasStove, spareRoom, additionalExtras, additionalExtrasCost, bayNo, gasStoveCost, notes ) VALUES (
-                '${req.body.firstName}','${req.body.lastName}','${req.body.iDNumber}', '${req.body.marital}','${req.body.email}','${req.body.bankName}','${req.body.accountNumber}','${req.body.accountType}','${req.body.block}','${req.body.unit}','${req.body.mood}','${req.body.flooring}','${fileOTP}','${fileId}', '${fileBank}','${filePaySlip}','${fileFica}','${dateTime}','${req.body.floorplan}','${req.body.mobile}','${req.body.landline}','${req.body.postalAddress}','${req.body.residentialAddress}','${req.body.salesAgent}','${req.body.salesAgentPhone}', '${req.body.personTwoFirstName}' , '${req.body.personTwoLastName}' , '${req.body.personTwoIDNumber}' , '${req.body.personTwoMarital}', '${req.body.personTwoEmail}' , '${req.body.personTwoBankName}', '${req.body.personTwoAccountNumber}', 
-                '${req.body.personTwoAccountType}', '${personTwoFileID}', '${personTwoFileBank}', '${personTwoFilePaySlip}', '${personTwoFileFica}', '${req.body.personTwoMobile}', '${req.body.personTwoLandline}', '${req.body.personTwoPostalAddress}', '${req.body.personTwoResidentialAddress}', '${req.body.salePerson}', '${req.body.saleBuyers}', '${req.body.saleType}', '${req.body.cashDeal}', '${req.body.balanceRem}', '${req.body.deposit}', ${depositDate} , '${req.body.gasStove}', '${req.body.spareRoom}','${req.body.additionalExtras}', '${req.body.additionalExtrasCost}' , '${req.body.bayNo}', '${req.body.gasStoveCost}', '${req.body.notes}') `;
+  (firstname, lastname, iDNumber, marital, email, bankName, accountNumber, accountType, block, unit, mood, flooring, fileOTP, fileId, fileBank, filePaySlip, fileFica, fileDepositPop, dateCreated, floorplan, mobile, landline, postalAddress, residentialAddress, salesAgent, salesAgentPhone, personTwoFirstName, personTwoLastName, personTwoIDNumber, personTwoMarital, personTwoEmail, personTwoBankName, personTwoAccountNumber, personTwoAccountType, personTwoFileID, personTwoFileBank, personTwoFilePaySlip, personTwoFileFica, personTwoMobile, personTwoLandline, personTwoPostalAddress, personTwoResidentialAddress, salePerson, saleBuyers, saleType, cashDeal, balanceRem, deposit, depositDate, gasStove, spareRoom, additionalExtras, additionalExtrasCost, bayNo, gasStoveCost, notes, trustName, trustNumber ) VALUES (
+                '${req.body.firstName}','${req.body.lastName}','${req.body.iDNumber}', '${req.body.marital}','${req.body.email}','${req.body.bankName}','${req.body.accountNumber}','${req.body.accountType}','${req.body.block}','${req.body.unit}','${req.body.mood}','${req.body.flooring}','${fileOTP}','${fileId}', '${fileBank}','${filePaySlip}','${fileFica}','${fileDepositPop}','${dateTime}','${req.body.floorplan}','${req.body.mobile}','${req.body.landline}','${req.body.postalAddress}','${req.body.residentialAddress}','${req.body.salesAgent}','${req.body.salesAgentPhone}', '${req.body.personTwoFirstName}' , '${req.body.personTwoLastName}' , '${req.body.personTwoIDNumber}' , '${req.body.personTwoMarital}', '${req.body.personTwoEmail}' , '${req.body.personTwoBankName}', '${req.body.personTwoAccountNumber}', 
+                '${req.body.personTwoAccountType}', '${personTwoFileID}', '${personTwoFileBank}', '${personTwoFilePaySlip}', '${personTwoFileFica}', '${req.body.personTwoMobile}', '${req.body.personTwoLandline}', '${req.body.personTwoPostalAddress}', '${req.body.personTwoResidentialAddress}', '${req.body.salePerson}', '${req.body.saleBuyers}', '${req.body.saleType}', '${req.body.cashDeal}', '${req.body.balanceRem}', '${req.body.deposit}', ${depositDate} , '${req.body.gasStove}', '${req.body.spareRoom}','${req.body.additionalExtras}', '${req.body.additionalExtrasCost}' , '${req.body.bayNo}', '${req.body.gasStoveCost}', '${req.body.notes}', '${req.body.trustName}', '${req.body.trustNumber}') `;
 
           let mysql2 = ` UPDATE salesData sd 
              INNER JOIN units u ON sd.unit = u.id     SET     sd.base_price = ${parseFloat(req.body.base_price)},    sd.contract_price = ${parseFloat(req.body.contract_price)}, sd.parking = ${parseFloat(req.body.parking)}, sd.extras = ${parseFloat(req.body.extras)}, sd.deductions = ${parseFloat(req.body.deductions)}, sd.sold = 1,  sd.actualsale_date = '${dateTime}'  WHERE u.unitName = '${req.body.unit}'`;
@@ -926,8 +929,8 @@ router.post("/getblocksforoptionsA", (req,res) => {
         res.json(result);
       }
     });
-    connection.release();
-  });
+    connection.release(); 
+  }); 
 });
 
 // CRM 1 : Transporter / formatting here 

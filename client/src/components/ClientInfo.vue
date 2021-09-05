@@ -55,6 +55,7 @@
                     style="background-color: lightgrey"
                   >
                     <v-text-field
+                      v-model="trustName"
                       label="Trust / Company name*"
                       required
                     ></v-text-field>
@@ -67,6 +68,7 @@
                     style="background-color: lightgrey"
                   >
                     <v-text-field
+                      v-model="trustNumber"
                       label="Trust / Company Number"
                       required
                     ></v-text-field>
@@ -1066,6 +1068,8 @@ export default {
       deductionsStr: "",
       notes: "",
 
+      trustName: "",
+      trustNumber: "",
       marital: "Not married",
       firstNameLabel: "First Name*",
       lastNameLabel: "Last Name*",
@@ -1382,6 +1386,9 @@ export default {
       formData.append("postalAddress", this.postaladdress);
       formData.append("residentialAddress", this.residentialAddress);
 
+      formData.append("trustName", this.trustName);
+      formData.append("trustNumber", this.trustNumber);
+
       // personTwo
       formData.append("personTwoFirstName", this.personTwoFirstName);
       formData.append("personTwoLastName", this.personTwoLastName);
@@ -1465,7 +1472,7 @@ export default {
           // little box saying 'Posted Successfully
           this.snackbar = true;
           // close the form after completing
-          this.closeClientInfo();
+         // this.closeClientInfo();
         },
         error => {
           console.log(error);

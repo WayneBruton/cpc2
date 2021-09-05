@@ -12,7 +12,7 @@
           class="elevation-1"
           :items-per-page="itemsPerPage"
         >
-          <template v-slot:item.sold="{ item }">
+          <template v-slot:[`item.sold`]="{ item }">
             <v-chip :color="getColor(item.sold)" small dark>
               {{ item.sold }}
             </v-chip>
@@ -272,7 +272,8 @@
               </v-dialog>
             </v-toolbar>
           </template>
-          <template v-slot:item.actions="{ item }">
+          <template v-slot:[`item.actions`]="{ item }">
+            
             <v-icon color="green" class="mr-2" @click="editItem(item)">
               mdi-pencil
             </v-icon>

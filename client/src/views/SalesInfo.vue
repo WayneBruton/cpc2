@@ -205,6 +205,7 @@ export default {
   computed: {
     salesFiltered() {
       if (this.search === "") {
+        console.log("salesFiltered = ", this.sales)
         return this.sales;
       } else {
         return this.sales.filter(el => {
@@ -279,10 +280,11 @@ export default {
           response => {
             console.log("CLIENT-SIDE: RESPONSE DATA: ", response.data[0]);
 
-            this.sales.push(response.data[0]);
+           // this.sales.push(response.data[0]);
+            this.sales = response.data[0];
             this.unitId = response.data[0].unitId;
             console.log("XDXDX", this.sales)
-            this.sales.forEach(el => {
+            this.sales[0].forEach(el => {
               el.fileOTPurl = `${this.url}/uploads/${el.fileOTP}`;
               // console.log("FileId", el.fileId);
               if (

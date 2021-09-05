@@ -65,6 +65,7 @@
                     style="background-color: lightgrey"
                   >
                     <v-text-field
+                      v-model="editData[0].trustName"
                       label="Trust / Company name*"
                       required
                     ></v-text-field>
@@ -77,6 +78,7 @@
                     style="background-color: lightgrey"
                   >
                     <v-text-field
+                      v-model="editData[0].trustNumber"
                       label="Trust / Company Number"
                       required
                     ></v-text-field>
@@ -1439,6 +1441,9 @@ export default {
         formData.append("documents", files[x]);
         //console.log("FileInfo::: ", files[x]);
       }
+
+       formData.append("trustName", this.editData[0].trustName);
+      formData.append("trustNumber", this.editData[0].trustNumber);
       formData.append("firstName", this.editData[0].firstname);
       formData.append("lastName", this.editData[0].lastname);
       formData.append("iDNumber", this.editData[0].iDNumber);
@@ -1466,6 +1471,8 @@ export default {
         "personTwoFirstName",
         this.editData[0].personTwoFirstName
       );
+
+
       formData.append("personTwoLastName", this.editData[0].personTwoLastName);
       formData.append("personTwoIDNumber", this.editData[0].personTwoIDNumber);
       formData.append("personTwoMarital", this.editData[0].personTwoMarital);
