@@ -1059,6 +1059,13 @@
                 rounded
               >
                 Save
+
+                <v-icon
+                  dark
+                  right
+                >
+                  mdi-checkbox-marked-circle
+                </v-icon>
               </v-btn>
             </v-card-actions>
           </v-card>
