@@ -830,10 +830,10 @@ router.post("/completeTransfers", (req, res) => {
 
   let mysqlPrefix = ` insert into stocktranfers (supplierName, contactID, block, unit, stockId, qtyTransfered) `
   let mysql = "";
-  let mysql2Prefix = ` update stockitems set requisitioned = IFNULL(requisitioned,0)  + `
+  let mysql2Prefix = ` update stockitems s join purchaseorders po on po.stockId = s.id set requisitioned = IFNULL(requisitioned,0)  + `
   req.body.stockList.forEach(stockItem => {
     mysql = mysql + mysqlPrefix + ` VALUES ('${req.body.subContractor[0].supplierName}', '${req.body.subContractor[0].contactID}', '${req.body.block}', '${req.body.unit}',  '${stockItem.stockId}', '${stockItem.qtyToTransfer}' ); `
-                  + mysql2Prefix + ` ${parseInt(stockItem.qtyToTransfer)} WHERE id = '${stockItem.stockId}';`
+                  + mysql2Prefix + ` ${parseInt(stockItem.qtyToTransfer)} WHERE s.id = '${stockItem.stockId}' AND po.reference = '${stockItem.mainCategory}';`
   })
   console.log(chalk.cyanBright("completeTransfers sql", mysql))
 
@@ -859,11 +859,18 @@ router.post("/completeTransfers", (req, res) => {
 router.post("/submitStockTake", (req, res) => {
   console.log("submitStockTake", req.body)
 
-  let mysqlPrefix = ` insert into stocktake (stockId, qtynHand, qtyCounted, countCorrect) `
+  let mysqlPrefix = ` insert into stocktake (stockId, qtyOnHand, qtyCounted, countCorrect, stockTakeDate) `
+  var today = new Date();
+  var date =
+    today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+  var time =
+    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  var dateTime = date + " " + time;
+  
   let mysql = "";
   //let mysql2Prefix = ` update stockitems set requisitioned = IFNULL(requisitioned,0)  + `
   req.body.stockList.forEach(stockItem => {
-    mysql = mysql + mysqlPrefix + ` VALUES ('${stockItem.stockId}', '${stockItem.qtyOnHand}', '${stockItem.qtyCounted}' '${req.body.subContractor[0].contactID}', '${req.body.block}', '${req.body.unit}',  '${stockItem.stockId}', 'v' ); `
+    mysql = mysql + mysqlPrefix + ` VALUES ('${stockItem.stockId}', '${stockItem.qtyOnHand}', '${stockItem.qtyCounted}' '${req.body.countCorrect}', '${dateTime}'); `
                   //+ mysql2Prefix + ` ${parseInt(stockItem.qtyToTransfer)} WHERE id = '${stockItem.stockId}';`
   })
   console.log(chalk.greenBright("completeTransfers sql", mysql))

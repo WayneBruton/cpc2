@@ -180,6 +180,15 @@ const MyPlugin = {
               console.log(e);
             });
         },
+        getDateTimeNow() {
+          var today = new Date();
+          var date =
+            today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+          var time =
+            today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+          var dateTime = date + " " + time;
+          return dateTime;
+        },
         convertToString(factor) {
           //CONVERTS NUMBERS TO STRING WTH "R"
           if (typeof factor === "string" || factor instanceof String) {

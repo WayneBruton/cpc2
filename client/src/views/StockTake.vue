@@ -2,7 +2,7 @@
   <div class="about">
     <br />
     <h2> Stock Take </h2>
-    <!-- <v-btn id="createButton" outlined text @click="opencompleteTransfer">Complete Transfer</v-btn> -->
+     <v-btn id="createButton" outlined text @click="submitStockTake">Submit Stock Take</v-btn> 
     <br /> <br />
     <!-- Row wrapping the entire app -->
     <v-row>
@@ -62,7 +62,8 @@
                   ></v-list-item-title>
                  <v-switch
                     v-model="stockItem.CountCorrect"
-                    :label="`Count Correct: ${switch1.toString()}`"
+                    :label="stockItem.CountCorrect  ?  'Yes' : 'No'"
+                    @change="changeSwitch"
                   ></v-switch>
                     </v-list-item-content>
               </v-list-item>
@@ -130,7 +131,8 @@ export default {
             response.data.forEach(stockItem => {
                 stockItem.qtyOnHandLbl  = "Qty On Hand";
                 stockItem.qtyCountedLbl = "Qty Counted";
-                stockItem.CountCorret   = ""
+                stockItem.CountCorrect   = ""
+                stockItem.CountCorrectLbl = "Count Correct?"
                 stockItem.qtyCounted    = 0;
                 stockItem.CountCorrect = false;
                 this.StockList.push(stockItem);                                              
@@ -145,11 +147,19 @@ export default {
           console.log(e);
         });
    },
+   changeSwitch(evt) {
+     console.log("evt",evt);
+     this.StockList.forEach(stockItem => {
+       //if()
+       console.log("StockItem=", stockItem)
+     })
+   },
    async submitStockTake() {
     this.StockList = [];     
       let data = {
         id: this.$store.state.development.id,
-        StockList: this.StockList
+        StockList: this.StockList,
+        countCorrect: this.switch1
       }
        await axios({
         method: "post",
