@@ -2,7 +2,7 @@
   <div class="about">
     <br />
     <h2> Stock Take </h2>
-     <v-btn id="createButton" outlined text @click="submitStockTake">Submit Stock Take</v-btn> 
+     <v-btn id="createButton" outlined text @click="openSubmitStockTake">Submit Stock Take</v-btn> 
     <br /> <br />
     <!-- Row wrapping the entire app -->
     <v-row>
@@ -10,15 +10,21 @@
       <v-col cols="12" >
         <v-list three-line outlined shaped class="overflow-y-auto" max-height="90vh">
           <v-subheader>
-           <h3 justify="center"> <b> Stock List </b> </h3>
+           <h3 justify="center"> <b> Stock List          </b> </h3>
+           <v-col cols="3" >
+             <v-text-field
+              prepend-icon="mdi-magnify"
+              placholder="Search"
+              label="Search"
+              v-model="search"
+            ></v-text-field> 
+           </v-col>
           </v-subheader>
-          <draggable v-model="StockList"
-            @change="stockListChanged"
-            :group="group2"
-            style="min-height: 10px"
-            :disabled="disabled"
+          <draggable v-model="StockList"            
+            
+            style="min-height: 10px"            
           >
-            <template v-for="stockItem in StockList">
+            <template v-for="stockItem in stockListFiltered">
               <v-list-item :key="stockItem.id" ripple>
                 <v-list-item-icon>
                   <v-icon large color="green">{{ stockItem.icon }}</v-icon>
@@ -38,22 +44,9 @@
                    <v-list-item-title
                     v-html="stockItem.qtyOnHandLbl"
                   ></v-list-item-title>
-                  <v-list-item-subtitle
+                  <v-list-item-subtitle class="bigFont"
                     v-html="stockItem.qtyOnHand"
                   ></v-list-item-subtitle>
-                    </v-list-item-content>
-                    
-                    <v-list-item-content>
-                   <v-list-item-title
-                    v-html="stockItem.qtyCountedLbl"
-                  ></v-list-item-title>
-                  <v-text-field
-                      v-model="stockItem.qtyCounted"
-                      type="number"
-                      min="0"
-                      class="shrink"
-                      label=""                        
-                    ></v-text-field>
                     </v-list-item-content>
 
                     <v-list-item-content>
@@ -66,13 +59,58 @@
                     @change="changeSwitch"
                   ></v-switch>
                     </v-list-item-content>
+
+                    <v-list-item-content v-if="!stockItem.CountCorrect">
+                   <v-list-item-title
+                    v-html="stockItem.qtyCountedLbl"
+                  ></v-list-item-title>
+                  <v-text-field
+                      v-model="stockItem.qtyCounted"
+                      type="number"
+                      min="0"
+                      class="shrink"
+                      label=""                        
+                    ></v-text-field>
+                    </v-list-item-content>
+
+                    
               </v-list-item>
             </template>
           </draggable>
         </v-list>
       </v-col>
     </v-row>
+    <!-- Stock Transfer Dialog -->
+    <v-row justify="center">
+      <v-dialog v-model="openSubmitStockTakeDialog" persistent max-width="450px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Submit Stock Take?</span>
+          </v-card-title>
+          <!-- <v-card-text>
+           
+            <Medium>Submit Stock Take?</Medium>
+          </v-card-text> -->
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="closeView" v-if="openSubmitStockTakeDialog">
+              Cancel
+            </v-btn>          
+            <v-btn color="blue darken-1" text @click="submitStockTake" v-if="openSubmitStockTakeDialog">
+              Yes
+              <v-icon
+               
+              >
+              $steam
+               
+              </v-icon>
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
   </div>
+  
 </template>
 
 
@@ -105,8 +143,28 @@ export default {
     return {
         qtyCounted: 0,
         StockList: [],
-        switch1 : false
+        switch1 : true,
+        search: "",
+        openSubmitStockTakeDialog: false
     };
+  },
+  computed: {
+    stockListFiltered() {
+      if (this.search === "") {
+        console.log("salesFiltered = ", this.StockList)
+        return this.StockList;
+      } else {
+        return this.StockList.filter(el => {
+          return (
+            !this.search ||
+            el.itemCode.toLowerCase().indexOf(this.search.toLowerCase()) > -1 ||
+            el.itemDescription.toLowerCase().indexOf(this.search.toLowerCase()) > -1 ||
+            el.mainCategory.toLowerCase().indexOf(this.search.toLowerCase()) >
+              -1 
+          );
+        });
+      }
+    }
   },
   mounted() {
     this.getStockList()
@@ -115,6 +173,7 @@ export default {
   },
 
   methods: { 
+    
    async getStockList() {
     this.StockList = [];     
       let data = {
@@ -131,10 +190,9 @@ export default {
             response.data.forEach(stockItem => {
                 stockItem.qtyOnHandLbl  = "Qty On Hand";
                 stockItem.qtyCountedLbl = "Qty Counted";
-                stockItem.CountCorrect   = ""
-                stockItem.CountCorrectLbl = "Count Correct?"
+                stockItem.CountCorrect   = true
+                stockItem.CountCorrectLbl = "Correct Stock Qty?"
                 stockItem.qtyCounted    = 0;
-                stockItem.CountCorrect = false;
                 this.StockList.push(stockItem);                                              
             });
             //console.log("this.StockList = ", this.StockList)           
@@ -154,12 +212,55 @@ export default {
        console.log("StockItem=", stockItem)
      })
    },
+   openSubmitStockTake() {
+       this.openSubmitStockTakeDialog = true;     
+    },
+   closeView() {
+      this.openSubmitStockTakeDialog = false;
+   },
+   async sendEmail() {
+     let invalidStockCounts = []  
+     this.StockList.forEach(stockItem => {
+       if(!stockItem.CountCorrect) {
+         invalidStockCounts.push(stockItem);
+       }
+     });
+     console.log("invalidStockCounts=", invalidStockCounts )
+
+     await axios({
+        method: "post",
+        url: `${url}/sendStockTakeEmail`,
+        data: invalidStockCounts
+      })
+        .then(
+          response => {
+            console.log("CLIENT-SIDE: RESPONSE DATA: ", response.data);
+            if (response.data.success === true) {
+              this.initialData();
+            }
+          },
+          error => {
+            console.log("the Error", error);
+          }
+        )
+        .catch(e => {
+          console.log("THERE IS AN ERROR", e);
+        });
+
+    //  let data = {
+    //    info: invalidStockCounts
+    //  };
+
+   },
    async submitStockTake() {
-    this.StockList = [];     
+    //this.StockList = [];     
+    console.log("Submit Stock Take");
       let data = {
         id: this.$store.state.development.id,
         StockList: this.StockList,
-        countCorrect: this.switch1
+        countCorrect: this.switch1,
+        currentUser: this.$store.state.userName,
+        currentUserId: this.$store.state.userId
       }
        await axios({
         method: "post",
@@ -167,14 +268,9 @@ export default {
         data: data
       })
         .then(
-          response => {
-            response.data.forEach(stockItem => {
-                // stockItem.qtyOnHandLbl  = "Qty On Hand";
-                // stockItem.qtyCountedLbl = "Qty Counted";
-                // stockItem.qtyCounted    = 0;
-                this.StockList.push(stockItem);                                              
-            });
-            //console.log("this.StockList = ", this.StockList)           
+          () => {
+            this.sendEmail();     
+            this.closeView();                   
           },
           error => {
             console.log(error);
@@ -190,3 +286,9 @@ export default {
 
 };
 </script>
+
+<style scoped>
+.bigFont {
+  font-size: 18px;
+}
+</style>

@@ -5,6 +5,9 @@ const chalk = require("chalk");
 const { checktoken, jwtSignUser } = require("./checkToken");
 const dayjs = require("dayjs")
 const businessDays = require("dayjs-business-days");
+const multer = require("multer");
+const fs = require("fs");
+const nodemailer = require("nodemailer");
 
 const options1 = {
   holidays: [
@@ -777,7 +780,7 @@ router.post("/getStockList", (req, res) => {
       po.itemCode, 
       po.itemDescription, 
       d.quantityDelivered - IFNULL(si.requisitioned,0) as qtyOnHand, 
-       IFNULL(si.requisitioned,0)
+       IFNULL(si.requisitioned,0) as requisitioned 
     from deliveries d 
     join purchaseorders po on po.PONumber = d.PONumber 
     join stockitems si on si.id = po.stockId    
@@ -825,15 +828,52 @@ router.post("/getSubContractors", (req, res) => {
   });
 });
 
-router.post("/completeTransfers", (req, res) => {
-  console.log("completeTransfers", req.body)
 
-  let mysqlPrefix = ` insert into stocktranfers (supplierName, contactID, block, unit, stockId, qtyTransfered) `
+const fileFilter = function (req, file, cb) {
+  const allowedTypes = ["image/jpg", "image/jpeg", "image/png", "application/pdf"];
+  if (!allowedTypes.includes(file.mimetype)) {
+    const error = new Error("Wrong file type");
+    error.code = "LIMIT_FILE_TYPES";
+    console.log(req.path, error);
+    return cb(error, false);
+
+  }
+  cb(null, true);
+};
+
+let MAX_SIZE = 20000000;
+const upload = multer({
+  dest: "./public/uploads/",
+  fileFilter,
+  limits: {
+    fileSize: MAX_SIZE,
+    fieldSize: 100 * 1024 * 1024,
+  },
+});
+
+router.post("/uploadImage", upload.single("stockImage"),  (req, res) => { 
+  console.log("imageUploaded and renamed to: ", req.body.newImageName);
+  // rename the image 
+  console.log("req.file", req.file)
+  fs.rename(
+    `public/uploads/${req.file.filename}`,
+    `public/uploads/${req.body.newImageName}`,
+    (err) => {
+      if (err) console.log("Error renaming", err);
+      //throw err
+    }
+  );
+}),
+
+router.post("/completeTransfers",  (req, res) => {
+  console.log("completeTransfers req", req.body)
+ 
+  let mysqlPrefix = ` insert into stocktranfers (supplierName, contactID, block, unit, stockId, qtyTransfered, user, userId, stockImageUrl, transferDate) `
   let mysql = "";
   let mysql2Prefix = ` update stockitems s join purchaseorders po on po.stockId = s.id set requisitioned = IFNULL(requisitioned,0)  + `
   req.body.stockList.forEach(stockItem => {
-    mysql = mysql + mysqlPrefix + ` VALUES ('${req.body.subContractor[0].supplierName}', '${req.body.subContractor[0].contactID}', '${req.body.block}', '${req.body.unit}',  '${stockItem.stockId}', '${stockItem.qtyToTransfer}' ); `
-                  + mysql2Prefix + ` ${parseInt(stockItem.qtyToTransfer)} WHERE s.id = '${stockItem.stockId}' AND po.reference = '${stockItem.mainCategory}';`
+    mysql = mysql + mysqlPrefix + ` VALUES ('${req.body.subContractor[0].supplierName}', '${req.body.subContractor[0].contactID}', '${req.body.block}', '${req.body.unit}',  '${stockItem.stockId}', '${stockItem.qtyToTransfer}' , '${req.body.user}','${req.body.userId}', 'public/uploads/${req.body.imageName}', '${req.body.transferDate}'); `
+                  + mysql2Prefix + ` ${parseInt(stockItem.qtyToTransfer)} WHERE s.id = '${stockItem.stockId}' AND po.reference = '${stockItem.mainCategory}' ;`
   })
   console.log(chalk.cyanBright("completeTransfers sql", mysql))
 
@@ -852,14 +892,12 @@ router.post("/completeTransfers", (req, res) => {
     });
     connection.release();
   });
-
-  
 });
 
 router.post("/submitStockTake", (req, res) => {
-  console.log("submitStockTake", req.body)
+  console.log("submitStockTake in server")
 
-  let mysqlPrefix = ` insert into stocktake (stockId, qtyOnHand, qtyCounted, countCorrect, stockTakeDate) `
+  let mysqlPrefix = ` insert into stocktake (stockId, itemCode, reference, qtyOnHand, qtyCounted, countCorrect, stockTakeDate, user, userId) `
   var today = new Date();
   var date =
     today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
@@ -869,8 +907,8 @@ router.post("/submitStockTake", (req, res) => {
   
   let mysql = "";
   //let mysql2Prefix = ` update stockitems set requisitioned = IFNULL(requisitioned,0)  + `
-  req.body.stockList.forEach(stockItem => {
-    mysql = mysql + mysqlPrefix + ` VALUES ('${stockItem.stockId}', '${stockItem.qtyOnHand}', '${stockItem.qtyCounted}' '${req.body.countCorrect}', '${dateTime}'); `
+  req.body.StockList.forEach(stockItem => {
+    mysql = mysql + mysqlPrefix + ` VALUES ('${stockItem.stockId}','${stockItem.itemCode}','${stockItem.mainCategory}',  '${stockItem.qtyOnHand}', '${stockItem.qtyCounted}' , '${stockItem.CountCorrect}', '${dateTime}', '${req.body.currentUser}',  '${req.body.currentUserId}' ); `
                   //+ mysql2Prefix + ` ${parseInt(stockItem.qtyToTransfer)} WHERE id = '${stockItem.stockId}';`
   })
   console.log(chalk.greenBright("completeTransfers sql", mysql))
@@ -889,6 +927,125 @@ router.post("/submitStockTake", (req, res) => {
       }
     });
     connection.release();
+  });
+
+  router.post("/sendStockTakeEmail", (req, res) => {
+    console.log("XXXX", req.body)
+    let subject = `Stock Take Completed`;
+    let recipient = "connorm11111@gmail.com"
+    // ${req.body.info[0].firstname} ${req.body.info[0].firstname}
+
+    let invalidItemsHtml = ""
+    req.body.forEach(invalidItem => {
+        invalidItemsHtml = invalidItemsHtml + " <br/>  <br/> Stock Item: " + invalidItem.itemCode 
+                         + "<br/> Qty On Hand: " + invalidItem.qtyOnHand
+                         + "<br/> Qty Counted: " +invalidItem.qtyCounted
+
+    })
+    console.log("invalidItemsHtml=",invalidItemsHtml)
+    // The following documents have been received
+    let output = `Dear Morne,
+            A stock take has been completed and the following items have been reported as not fully accounted for;
+            <br><br><br>
+            
+            <strong> 
+               ${invalidItemsHtml}              
+            </strong>
+            
+            <br><br>          
+            Kind regards
+            <br><br>
+    
+            <strong>Stock Take Sytem</strong><br>
+            Oppurtunity Private Capital<br>
+            CPC<br><br>
+            `;
+
+    sendMail(subject, recipient, output)
+    .then(() => {
+      console.log("mail sent")
+    })
+  });
+
+  async function sendMail(subject, recipient, output) {
+    let mailOptions = {
+      from: "Cape Projects Construction <wayne@eccentrictoad.com>",
+      to: `${recipient}`,
+      cc: ["waynebruton@icloud.com"],
+      subject: `${subject}`,
+      text: "Stock Take Info",
+      html: output,
+      // attachments: [
+      //   {
+      //     filename: `${filename}.pdf`,
+      //     path: `public/purchaseorders/${filename}.pdf`, // stream this file
+      //   },
+      // ],
+    };
+    await transporter.sendMail(mailOptions, (error, info) => {
+      console.log("Sending mail in the transporter")
+      if (error) {
+        console.log("Error with connection", error);
+      }
+    });
+  }
+
+  let transporter = nodemailer.createTransport({
+    host: process.env.MAILHOST,
+    port: 465, //587
+    secure: true,
+    auth: {
+      user: process.env.MAILUSER,
+      pass: process.env.MAILPASSWORD,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+
+  router.post("/getAllUnits", (req,res) =>{
+    console.log(req.body) // this is the only changed method the rest are new
+      let mysql = `select u.id, s.unit, u.unitName from salesData s, units u where u.id = s.unit and u.subsection = ${req.body.subsection} and s.development = ${req.body.id}`
+  
+    console.log("Hello",mysql);
+    pool.getConnection(function (err, connection) {
+      if (err) {
+        connection.release();
+        resizeBy.send("Error with connection");
+      }
+      connection.query(mysql, function (error, result) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log(result)
+          res.json(result);
+        }
+      });
+      connection.release();
+    });
+  
+  });
+
+  router.post("/getblocksforoptionsA", (req,res) => {
+    console.log("Awesome")
+    // res.json({awesome: "It Works"})
+      console.log("TESTING")
+    let mysql = `select * from subsection where subsectionName not like 'Common Area' and  development = ${req.body.id}`;
+    pool.getConnection(function (err, connection) {
+      if (err) {
+        connection.release();
+        resizeBy.send("Error with connection");
+      }
+      connection.query(mysql, function (error, result) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log(result);
+          res.json(result);
+        }
+      });
+      connection.release(); 
+    }); 
   });
 
   

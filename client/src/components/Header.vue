@@ -213,20 +213,20 @@ export default {
           {
             title: "Stock Transfer",
             name: "stocktrx",
-            icon: "mdi-certificate",
+            icon: "mdi-transfer",
             role: 3,
             menu: 1,
-            id: "stocktake",
-            color: "green lighten-5"
+            id: "stocktrx",
+            color: "green accent-5"
           },
           {
             title: "Stock Take",
             name: "stocktake",
-            icon: "mdi-certificate",
+            icon: "mdi-numeric-9-plus-box-multiple-outline",
             role: 3,
             menu: 1,
             id: "stocktake",
-            color: "blue lighten-5"
+            color: "blue accent-4"
           }
 
           // {

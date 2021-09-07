@@ -639,8 +639,8 @@
 
                   <!-- Standard Extras -->
                   <v-col
-                    cols="4"
-                    sm="4"
+                    cols="3"
+                    sm="3"
                     style="background-color: lightgoldenrodyellow"
                   >
                     <strong><b>Garden Number:</b></strong>
@@ -652,8 +652,8 @@
                     ></v-text-field>
                   </v-col>
                   <v-col
-                    cols="4"
-                    sm="4"
+                    cols="3"
+                    sm="3"
                     style="background-color: lightgoldenrodyellow"
                   >
                     <strong><b>Garden Size:</b></strong>
@@ -667,8 +667,20 @@
                     ></v-text-field>
                   </v-col>
                   <v-col
-                    cols="4"
-                    sm="4"
+                    cols="3"
+                    sm="3"
+                    style="background-color: lightgoldenrodyellow"
+                  >
+                    <strong><b>Original Bay No:</b></strong>
+                    <v-text-field
+                      label="Original Bay Number"
+                      v-model="editData[0].originalBayNo"
+                    >
+                    </v-text-field>
+                  </v-col>
+                  <v-col
+                    cols="3"
+                    sm="3"
                     style="background-color: lightgoldenrodyellow"
                   >
                     <strong><b>Parking Bay No:</b></strong>
@@ -1500,6 +1512,7 @@ export default {
       formData.append("base_price", this.editData[0].base_price);
 
       formData.append("parking", this.editData[0].parking);
+      formData.append("originalBayNo", this.editData[0].originalBayNo);
 
       formData.append("extras", this.editData[0].extras);
 

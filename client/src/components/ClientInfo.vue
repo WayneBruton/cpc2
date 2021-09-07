@@ -617,8 +617,8 @@
 
                   <!-- Standard Extras -->
                   <v-col
-                    cols="4"
-                    sm="4"
+                    cols="3"
+                    sm="3"
                     style="background-color: lightgoldenrodyellow"
                   >
                     <strong><b>Garden Number:</b></strong>
@@ -630,8 +630,8 @@
                     ></v-text-field>
                   </v-col>
                   <v-col
-                    cols="4"
-                    sm="4"
+                    cols="3"
+                    sm="3"
                     style="background-color: lightgoldenrodyellow"
                   >
                     <strong><b>Garden Size:</b></strong>
@@ -645,9 +645,20 @@
                       required
                     ></v-text-field>
                   </v-col>
+
                   <v-col
-                    cols="4"
-                    sm="4"
+                    cols="3"
+                    sm="3"
+                    style="background-color: lightgoldenrodyellow"
+                  >
+                    <strong><b>Original Bay No:</b></strong>
+                    <v-text-field label="Original Bay No" v-model="originalBayNo">
+                    </v-text-field>
+                  </v-col>
+
+                  <v-col
+                    cols="3"
+                    sm="3"
                     style="background-color: lightgoldenrodyellow"
                   >
                     <strong><b>Parking Bay No:</b></strong>
@@ -1118,6 +1129,7 @@ export default {
       personTwoLandline: "",
       personTwoPostalAddress: "",
       personTwoResidentialAddress: "",
+      originalBayNo: "",
       //url: "",
       mobile: {
         countryCode: "ZA",
@@ -1436,6 +1448,7 @@ export default {
       formData.append("base_price", this.basePrice);
 
       formData.append("parking", this.parking);
+      formData.append("originalBayNo", this.originalBayNo);
       formData.append("extras", this.extras);
 
       formData.append("deductions", this.deductions);
