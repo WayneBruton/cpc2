@@ -17,6 +17,12 @@
         >
           <v-subheader>
            <h3 justify="center"> <b> Stock List </b> </h3>
+           <v-text-field
+              prepend-icon="mdi-magnify"
+              placholder="Search"
+              label="Search"
+              v-model="searchStock"
+            ></v-text-field> 
           </v-subheader>
           <draggable
             v-model="StockList"
@@ -25,7 +31,7 @@
             @change="items1Changed"
             :disabled="disabled"
           >
-            <template v-for="stock in StockList">
+            <template v-for="stock in stockListFiltered">
               <v-list-item :key="stock.id" ripple>
                 <v-list-item-icon>
                   <v-icon large color="green">{{ stock.icon }}</v-icon>
@@ -172,6 +178,12 @@
           max-height="90vh">
           <v-subheader>
             <h3> <b> Sub Contractors </b> </h3>
+            <v-text-field
+              prepend-icon="mdi-magnify"
+              placholder="Search"
+              label="Search"
+              v-model="searchSubContractor"
+            ></v-text-field> 
           </v-subheader>
           <draggable
             v-model="SubContractors"
@@ -179,7 +191,7 @@
             style="min-height: 10px"
             @change="currentContractorChanged"
           >
-            <template v-for="item in SubContractors">
+            <template v-for="item in subContractorsFiltered">
               <v-list-item :key="item.id" ripple>
                 <v-list-item-icon>
                   <v-icon large color="blue">{{ item.icon }}</v-icon>
@@ -216,31 +228,53 @@
                     placeholder="Enter title of your request"                    
                   ></v-text-field>
                 </v-col>
+                <!-- the block and units, allow for multi select,  -->
                 <v-col cols="12">
-                  <v-text-field
+                  <v-autocomplete
+                    style="margin-right: 8px"
+                    v-model="block"
+                    :items="blocks"
+                    dense
+                    filled
+                    item-text="subsectionName"
+                    label="Choose Block"
+                    @change="chooseUnit"
+                  ></v-autocomplete>
+                  <!-- <v-text-field
                       v-model="block"
                       type="text"                      
                       class="shrink"
                       label="Block"                      
-                  ></v-text-field>
+                  ></v-text-field> -->
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field
+                  <v-autocomplete
+                    style="margin-left: 8px"
+                    v-model="unit"
+                    :items="units"
+                    dense
+                    filled
+                    item-text="unitName"
+                    label="Choose Unit"
+                    @change="unitChosen"
+                  ></v-autocomplete>
+                  
+                  <!-- <v-text-field
                     v-model="unit"
                     type="text"                    
                     class="shrink"
                     label="Unit"                    
-                  ></v-text-field>                  
+                  ></v-text-field>                   -->
                 </v-col>              
                 <v-col cols="12">
                   <v-file-input
-                    v-model="stockTransferImage"
+                    v-model="stockImage"
                     label="Upload Image"
                     accept="image/png, image/jpeg, image/bmp, image/jpg"
                     filled
                     hint="Upload Image"
                     persistent-hint
-                    @change="uploadImage()"              
+                           
                   ></v-file-input>       
                 </v-col> 
               </v-row>
@@ -459,9 +493,7 @@ export default {
         group: "people"
       },
       items: [],
-      items1: [],
-      items2: [],
-      items3: [],
+
 
       // left hand side Properties
       StockList: [],
@@ -483,13 +515,50 @@ export default {
       unit: "",
       block: "",
       qtyToTransfer: 0,
-      stockTransferImage: null
+      stockTransferImage: null,
+      stockImage: null,
+      imageFile: null,
+      units: [],
+      blocks: [],
+      searchStock: "",
+      searchSubContractor: ""
     };
   },
   beforeDestroy() {
     this.updateTasks();
   },
-  mounted() {
+  computed: {
+    stockListFiltered() {
+      if (this.searchStock === "") {
+        console.log("salesFiltered = ", this.StockList)
+        return this.StockList;
+      } else {
+        return this.StockList.filter(el => {
+          return (
+            !this.searchStock ||
+            el.itemCode.toLowerCase().indexOf(this.searchStock.toLowerCase()) > -1 ||
+            el.itemDescription.toLowerCase().indexOf(this.searchStock.toLowerCase()) > -1 ||
+            el.mainCategory.toLowerCase().indexOf(this.searchStock.toLowerCase()) >
+              -1 
+          );
+        });
+      }
+    },
+    subContractorsFiltered() {
+      if (this.searchSubContractor === "") {
+        console.log("subContractorsFiltered = ", this.SubContractors)
+        return this.SubContractors;
+      } else {
+        return this.SubContractors.filter(el => {
+          return (
+            !this.searchSubContractor ||
+            el.supplierName.toLowerCase().indexOf(this.searchSubContractor.toLowerCase()) > -1 
+          );
+        });
+      }
+    }
+  },
+  async mounted() {
     this.getTasks();
     // crm
     this.getStockList();
@@ -516,6 +585,33 @@ export default {
       this.group3 = "group3";
       this.group4 = "group4";
     }
+
+    let data = {
+      id: this.$store.state.development.id
+    };
+    await axios({
+      method: "post",
+      // method: "get",
+      url: `${url}/getblocksforoptionsA`,
+      // url: `${url}/ooo`,
+      data: data
+    })
+      .then(
+        response => {
+          console.log("RESPONSE DATA CONNOR:", response.data);
+          this.blocks = response.data.filter(el => {
+            return el.subsectionName !== "Common Area";
+          });
+
+          console.log(this.blocks);
+        },
+        error => {
+          console.log("the Error", error);
+        }
+      )
+      .catch(e => {
+        console.log("THERE IS AN ERROR", e);
+      });
   },  
 
   methods: {
@@ -581,9 +677,52 @@ export default {
     completeTransfer() {
       console.log("CompleteTransfers get StockList and SupplierID")
       this.completeTransfers();
+      this.uploadImage();
+    },
+    async uploadImage() {
+      // upload the image 
+  
+      var today = new Date();
+      var date =
+        today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+      var time =
+        today.getHours() + "-" + today.getMinutes() + "-" + today.getSeconds();
+      var dateTime = date + "_" + time; 
+      let image = dateTime + "_" + this.currentSubContractor.supplierName + "." + this.stockImage.name.split(".")[1];
+
+      let formData = new FormData();
+      formData.append("stockImage", this.stockImage);
+       formData.append("newImageName", image);
+
+      console.log("this.stockImage = ", this.stockImage);
+      //console.log("this.stockImage = ", insert);
+      await axios({
+        method: "post",
+        url: `${url}/uploadImage`,
+        data: formData
+      })
+        .then(
+          () => {
+            this.refreshData()            
+          },
+          error => {
+            console.log(error);
+          }
+        )
+        .catch(e => {
+          console.log(e);
+        });
     },
     async completeTransfers() {
       // take all the stock in the currentStockList and update the status in StockTranfers table from busy to complete, or mismatch, ? 
+      console.log("stockimage=", this.stockImage);
+      //let image = this.stockImage[0];
+      var today = new Date();
+      var date =
+        today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+      var time =
+        today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+      var dateTime = date + "_" + time;
       let insert = {
         development: this.$store.state.development.id,
         subContractor: this.currentSubContractor,
@@ -593,8 +732,46 @@ export default {
         stockList: this.currentStockList,
         unit: this.unit,
         block: this.block,
-        qtyToTransfer: this.qty  
+        qtyToTransfer: this.qtyToTransfer ,
+        currentUser: this.$store.state.userName,
+        currentUserId: this.$store.state.userId,
+        imageName: dateTime + "_" + this.currentSubContractor.supplierName + "." + this.stockImage.name.split(".")[1],
+        transferDate: dateTime
       };
+      // const  keys = Object.keys(insert);
+      // const values = Object.values(insert);
+
+      //  console.log("insert=", keys);
+      //  console.log("insert=", values);
+      //  insert.forEach(el => { console.log(el) })
+      //  let formData = new FormData();
+      //  for (var i = 0; i < keys.length; i++) {
+      //     formData.append(keys[i], values[i])
+      //  }
+      //  console.log("suppleir=", this.currentSubContractor.supplierName);
+     // let formData = new FormData();
+     // formData.append("insert",insert);
+
+      // formData.append("stockImage", this.stockImage);
+      // formData.append("development",this.$store.state.development.id);
+      // formData.append("subContractor", this.currentSubContractor.supplierName);
+      // formData.append("contactId", this.currentSubContractor.contactId);
+      // formData.append("stockList", this.currentStockList);
+      // formData.append("unit", this.unit);
+      // formData.append("block", this.block);
+      // formData.append("qtyToTransfer", this.qtyToTransfer);
+      // formData.append("currentUser", this.$store.state.userName);
+      // formData.append("currentUserId",this.$store.state.userId);
+
+      // formData.append("stockImage", this.stockImage);
+      // formData.append("stockImage", this.stockImage);
+      
+      // try this without the append, get the stockImage in the insert, put it in a variable first and then use the variable in the insert block
+
+      // formData.append('files',)
+
+      console.log("this.stockImage = ", this.stockImage);
+      //console.log("this.stockImage = ", insert);
       await axios({
         method: "post",
         url: `${url}/completeTransfers`,
@@ -619,6 +796,7 @@ export default {
           this.clearCurrentSubContractor();
           alert("You may only have 1 Sub Contractor selected at a time");
         }
+        console.log("SubContractor: ",  this.currentSubContractor)
         this.currentSubContractor.forEach(subContractor => {
           console.log("SubContractor: ", subContractor)
           this.selectedSubContractorName = subContractor.supplierName;
@@ -636,18 +814,7 @@ export default {
       }
     },
     
-    uploadImage(event) {
-      // upload the image 
-
-      if (event.added) {
-        this.items.forEach(el => {
-          if (el.id === event.added.element.id) {
-            el.icon = "mdi-progress-wrench";
-            el.typeTask = "WIP";
-          }
-        });
-      }
-    }, 
+    
     async deleteCurrentSubContractor() {
       this.clearCurrentSubContractor();
     },
@@ -884,7 +1051,48 @@ export default {
         .catch(e => {
           console.log(e);
         });
-    }
+    },
+    async chooseUnit() {
+      let filteredData = this.blocks.filter(el => {
+        return el.subsectionName === this.block;
+      });
+      let data = {
+        id: this.$store.state.development.id,
+        subsection: filteredData[0].id,
+        subsectionName: filteredData[0].subsectionName
+        //subsectionName:
+      };
+      console.log(data);
+      console.log(process.env.VUE_APP_BASEURL);
+      // console.log("filteredData for getting subsectionname:", filteredData),
+      await axios({
+        method: "post",
+        url: `${url}/getAllUnits`,
+        data: data
+      })
+        .then(
+          response => {
+            let filteredData = response.data.filter(el => {
+              return el.unitName.substring(2, 1) !== ".";
+            });
+            this.units = filteredData;
+            console.log("XXXX", this.units);
+          },
+          error => {
+            console.log(error);
+          }
+        )
+        .catch(e => {
+          console.log(e);
+        });
+    },
+    unitChosen() {
+      let unitId = this.units.filter(el => {
+        return el.unitName === this.unitValue;
+      })[0].id;
+      console.log(unitId);
+      this.unitId = unitId;
+    },
   }
 };
 </script>
